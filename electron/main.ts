@@ -463,6 +463,7 @@ function getMainWindow(): BrowserWindow | null {
 }
 
 function getView(): "queue" | "solutions" | "debug" {
+  console.log(state.view , "=======================")
   return state.view
 }
 

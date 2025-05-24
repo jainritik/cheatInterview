@@ -41,6 +41,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           <option value="ruby">Ruby</option>
           <option value="sql">SQL</option>
           <option value="r">R</option>
+          <option value="hld">HLD</option>
+          <option value="lld">LLD</option>
         </select>
       </div>
     </div>

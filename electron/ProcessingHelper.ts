@@ -8,7 +8,7 @@ import { BrowserWindow } from "electron"
 
 const isDev = !app.isPackaged
 const API_BASE_URL = isDev
-  ? "http://localhost:3000"
+  ? "http://localhost:8080"
   : "https://www.interviewcoder.co"
 
 export class ProcessingHelper {
@@ -129,7 +129,7 @@ export class ProcessingHelper {
         }
 
         // Only set view to solutions if processing succeeded
-        console.log("Setting view to solutions after successful processing")
+        console.log("Setting view to solutions after successful processing" , result.data)
         mainWindow.webContents.send(
           this.deps.PROCESSING_EVENTS.SOLUTION_SUCCESS,
           result.data
@@ -270,6 +270,9 @@ export class ProcessingHelper {
 
             // Generate solutions after successful extraction
             const solutionsResult = await this.generateSolutionsHelper(signal)
+            
+            console.log(solutionsResult , "-------------")
+            
             if (solutionsResult.success) {
               // Clear any existing extra screenshots before transitioning to solutions view
               this.screenshotHelper.clearExtraScreenshotQueue()
@@ -356,7 +359,7 @@ export class ProcessingHelper {
 
       const response = await axios.post(
         `${API_BASE_URL}/api/generate`,
-        { ...problemInfo, language },
+        { question: problemInfo.problem },
         {
           signal,
           timeout: 300000,
@@ -369,10 +372,11 @@ export class ProcessingHelper {
           }
         }
       )
-
+      console.log(response.data , "line 375")
       return { success: true, data: response.data }
     } catch (error: any) {
       const mainWindow = this.deps.getMainWindow()
+      console.log(error , "line 379")
 
       // Handle timeout errors (both 504 and axios timeout)
       if (error.code === "ECONNABORTED" || error.response?.status === 504) {

@@ -173,6 +173,7 @@ const electronAPI = {
   onSolutionSuccess: (callback: (data: any) => void) => {
     const subscription = (_: any, data: any) => callback(data)
     ipcRenderer.on(PROCESSING_EVENTS.SOLUTION_SUCCESS, subscription)
+    console.log("callled ------- " , subscription)
     return () => {
       ipcRenderer.removeListener(
         PROCESSING_EVENTS.SOLUTION_SUCCESS,

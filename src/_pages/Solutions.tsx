@@ -271,6 +271,7 @@ const Solutions: React.FC<SolutionsProps> = ({
         if (!solution) {
           setView("queue")
         }
+        console.log("line 274 " , solution)
         setSolutionData(solution?.code || null)
         setThoughtsData(solution?.thoughts || null)
         setTimeComplexityData(solution?.time_complexity || null)
@@ -278,18 +279,36 @@ const Solutions: React.FC<SolutionsProps> = ({
         console.error("Processing error:", error)
       }),
       //when the initial solution is generated, we'll set the solution data to that
-      window.electronAPI.onSolutionSuccess((data) => {
-        if (!data) {
+      window.electronAPI.onSolutionSuccess((dataRaw) => {
+        // if (!data) {
+        //   console.warn("Received empty or invalid solution data")
+        //   return
+        // }
+
+        let data = dataRaw
+        if (typeof dataRaw === "string") {
+          try {
+            data = JSON.parse(dataRaw)
+          } catch (e) {
+            console.error("Invalid JSON from Electron", dataRaw)
+            return
+          }
+        }
+        if (!data || typeof data !== "object") {
           console.warn("Received empty or invalid solution data")
           return
         }
-        console.log({ data })
+      
+        console.log("DATA RECEIVED", data.data.code)
+      
+        console.log(data.data.thoughts  , "----line 287")
         const solutionData = {
-          code: data.code,
-          thoughts: data.thoughts,
-          time_complexity: data.time_complexity,
-          space_complexity: data.space_complexity
+          code: data.data.code,
+          thoughts: data.data.thoughts,
+          time_complexity: data.data.time_complexity,
+          space_complexity: data.data.space_complexity
         }
+        console.log({ solutionData } , "----line 294")
 
         queryClient.setQueryData(["solution"], solutionData)
         setSolutionData(solutionData.code || null)
@@ -464,6 +483,8 @@ const Solutions: React.FC<SolutionsProps> = ({
           <div className="w-full text-sm text-black bg-black/60 rounded-md">
             <div className="rounded-lg overflow-hidden">
               <div className="px-4 py-3 space-y-4 max-w-full">
+                {solutionData}
+                {"testiynfjjkg"}
                 {!solutionData && (
                   <>
                     <ContentSection
