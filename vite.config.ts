@@ -34,6 +34,20 @@ export default defineConfig({
             }
           }
         }
+      },
+      {
+        // solutionPopupPreload.js
+        entry: "electron/solutionPopupPreload.js",
+        vite: {
+          build: {
+            outDir: "dist-electron",
+            sourcemap: true, // Optional: sourcemap for preload
+            minify: false, // Optional: minify preload
+            rollupOptions: {
+              external: ["electron"]
+            }
+          }
+        }
       }
     ])
   ],
@@ -48,7 +62,13 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "renderer/public/index.html"), // Assuming main index.html is here
+        solutionPopup: path.resolve(__dirname, "renderer/public/solutionPopup.html")
+      }
+    }
   },
   resolve: {
     alias: {

@@ -1,7 +1,7 @@
 // ProcessingHelper.ts
 import fs from "node:fs"
 import { ScreenshotHelper } from "./ScreenshotHelper"
-import { IProcessingHelperDeps } from "./main"
+import { IProcessingHelperDeps, createSolutionPopupWindow } from "./main"
 import axios from "axios"
 import { app } from "electron"
 import { BrowserWindow } from "electron"
@@ -276,10 +276,12 @@ export class ProcessingHelper {
             if (solutionsResult.success) {
               // Clear any existing extra screenshots before transitioning to solutions view
               this.screenshotHelper.clearExtraScreenshotQueue()
-              mainWindow.webContents.send(
-                this.deps.PROCESSING_EVENTS.SOLUTION_SUCCESS,
-                solutionsResult.data
-              )
+              // mainWindow.webContents.send(
+              //   this.deps.PROCESSING_EVENTS.SOLUTION_SUCCESS,
+              //   solutionsResult.data
+              // )
+              this.deps.createSolutionPopupWindow(solutionsResult.data)
+              // this.deps.setView("solutions") // Commented out as per plan
               return { success: true, data: solutionsResult.data }
             } else {
               throw new Error(

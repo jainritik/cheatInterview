@@ -14,6 +14,7 @@ const isDev = process.env.NODE_ENV === "development" || !app.isPackaged
 const state = {
   // Window management properties
   mainWindow: null as BrowserWindow | null,
+  solutionPopupWindow: null as BrowserWindow | null,
   isWindowVisible: false,
   windowPosition: null as { x: number; y: number } | null,
   windowSize: null as { width: number; height: number } | null,
@@ -68,6 +69,7 @@ export interface IProcessingHelperDeps {
   setHasDebugged: (hasDebugged: boolean) => void
   getHasDebugged: () => boolean
   PROCESSING_EVENTS: typeof state.PROCESSING_EVENTS
+  createSolutionPopupWindow: (solutionData: any) => void
 }
 
 export interface IShortcutsHelperDeps {
@@ -126,7 +128,8 @@ function initializeHelpers() {
     deleteScreenshot,
     setHasDebugged,
     getHasDebugged,
-    PROCESSING_EVENTS: state.PROCESSING_EVENTS
+    PROCESSING_EVENTS: state.PROCESSING_EVENTS,
+    createSolutionPopupWindow
   } as IProcessingHelperDeps)
   state.shortcutsHelper = new ShortcutsHelper({
     getMainWindow,
@@ -272,6 +275,50 @@ async function createWindow(): Promise<void> {
   state.currentX = bounds.x
   state.currentY = bounds.y
   state.isWindowVisible = true
+}
+
+// Solution Popup Window
+export function createSolutionPopupWindow(solutionData: any): void {
+  if (state.solutionPopupWindow) {
+    state.solutionPopupWindow.close()
+    state.solutionPopupWindow = null
+  }
+
+  const popupWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    show: false,
+    parent: state.mainWindow || undefined,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: isDev
+        ? path.join(__dirname, "../dist-electron/solutionPopupPreload.js")
+        : path.join(__dirname, "solutionPopupPreload.js")
+    }
+  })
+
+  state.solutionPopupWindow = popupWindow
+
+  popupWindow.loadFile(path.join(__dirname, "../dist/solutionPopup.html")).catch(error => {
+    console.error("Failed to load solutionPopup.html:", error)
+  })
+
+  popupWindow.once("ready-to-show", () => {
+    popupWindow.show()
+  })
+
+  popupWindow.webContents.on("did-finish-load", () => {
+    popupWindow.webContents.send("solution-data", solutionData)
+  })
+
+  if (isDev) {
+    popupWindow.webContents.openDevTools()
+  }
+
+  popupWindow.on("closed", () => {
+    state.solutionPopupWindow = null
+  })
 }
 
 function handleWindowMove(): void {
@@ -554,7 +601,8 @@ export {
   getImagePreview,
   deleteScreenshot,
   setHasDebugged,
-  getHasDebugged
+  getHasDebugged,
+  createSolutionPopupWindow
 }
 
 app.whenReady().then(initializeApp)
