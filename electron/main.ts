@@ -211,19 +211,43 @@ async function createWindow(): Promise<void> {
     async (event, errorCode, errorDescription) => {
       console.error("Window failed to load:", errorCode, errorDescription)
       // Always try to load the built files on failure
-      console.log("Attempting to load built files...")
+      const mainHtmlPath = path.join(__dirname, "../dist/index.html"); // Define it here as well for retry
+      console.log(`[Electron Main][Retry] Attempting to load main HTML from: ${mainHtmlPath}`);
       setTimeout(() => {
-        state.mainWindow?.loadFile(path.join(__dirname, "../dist/index.html")).catch((error) => {
-          console.error("Failed to load built files on retry:", error)
+        state.mainWindow?.loadFile(mainHtmlPath).catch((error) => {
+          console.error(`[Electron Main][Retry] Failed to load built files on retry: ${mainHtmlPath}`, error)
         })
       }, 1000)
     }
   )
 
   // Load the app - always load from built files
-  console.log("Loading application from built files...")
-  state.mainWindow?.loadFile(path.join(__dirname, "../dist/index.html")).catch((error) => {
-    console.error("Failed to load built files:", error)
+  const mainHtmlPath = path.join(__dirname, "../dist/index.html");
+  console.log(`[Electron Main] Attempting to load main HTML from: ${mainHtmlPath}`);
+  console.log(`[Electron Main] __dirname: ${__dirname}`);
+  console.log(`[Electron Main] process.cwd(): ${process.cwd()}`);
+  // Check if the file exists before attempting to load
+  const fs = require('fs'); // Import fs locally for this check
+  if (fs.existsSync(mainHtmlPath)) {
+    console.log(`[Electron Main] Confirmed: ${mainHtmlPath} exists.`);
+  } else {
+    console.error(`[Electron Main] Error: ${mainHtmlPath} does NOT exist or is not accessible.`);
+    // Optionally, list directory contents for debugging
+    try {
+      const distDir = path.join(__dirname, "../dist");
+      const parentDir = path.join(__dirname, "..");
+      console.log(`[Electron Main] Contents of ${parentDir}:`, fs.readdirSync(parentDir));
+      if (fs.existsSync(distDir)) {
+        console.log(`[Electron Main] Contents of ${distDir}:`, fs.readdirSync(distDir));
+      } else {
+        console.log(`[Electron Main] Directory ${distDir} does NOT exist.`);
+      }
+    } catch (e) {
+      console.error('[Electron Main] Error listing directory contents:', e);
+    }
+  }
+  state.mainWindow?.loadFile(mainHtmlPath).catch((error) => {
+    console.error(`[Electron Main] Failed to load built files: ${mainHtmlPath}`, error);
   })
 
   // Configure window behavior
