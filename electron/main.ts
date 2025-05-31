@@ -601,8 +601,7 @@ export {
   getImagePreview,
   deleteScreenshot,
   setHasDebugged,
-  getHasDebugged,
-  createSolutionPopupWindow
+  getHasDebugged
 }
 
 app.whenReady().then(initializeApp)
