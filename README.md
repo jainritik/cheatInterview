@@ -55,6 +55,11 @@ Interview Coder is a desktop application designed to help users with technical c
    # or
    yarn build
    ```
+5. Run the backend application in development mode:
+   ```
+  go run main.go
+   ```
+
 
 ## API Integration
 
